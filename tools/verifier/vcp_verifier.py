@@ -8,7 +8,11 @@ This tool verifies the integrity of VCP v1.1 event chains by checking:
 2. Sequence continuity
 3. PrevHash chain integrity
 4. Merkle root verification
-5. Digital signatures (when security object provided)
+5. Anchor metadata classification (NOT external proof verification)
+
+This PoC tool does not verify signatures, external timestamps, anchor cadence,
+or full VCP conformance. Exit 0 is available only with --integrity-only;
+exit 2 means the checked integrity passed but Silver was not established.
 
 Usage:
     python vcp_verifier.py <events.jsonl> [-s security_object.json]
@@ -57,6 +61,7 @@ class VCPVerifier:
         self.verbose = verbose
         self.events: List[Dict[str, Any]] = []
         self.security_object: Optional[Dict[str, Any]] = None
+        self.anchor_reference: Optional[Dict[str, Any]] = None
     
     def load_events(self, filepath: str) -> int:
         """
@@ -77,9 +82,11 @@ class VCPVerifier:
                     continue
                 try:
                     event = json.loads(line)
+                    if not isinstance(event, dict):
+                        raise ValueError(f"Event on line {line_num} must be an object")
                     self.events.append(event)
                 except json.JSONDecodeError as e:
-                    print(f"Warning: Invalid JSON on line {line_num}: {e}")
+                    raise ValueError(f"Invalid JSON on line {line_num}: {e}") from e
         
         return len(self.events)
     
@@ -96,14 +103,39 @@ class VCPVerifier:
         try:
             with open(filepath, 'r') as f:
                 self.security_object = json.load(f)
+            if not isinstance(self.security_object, dict) or not self.security_object:
+                raise ValueError("Security object must be a non-empty JSON object")
             return True
         except Exception as e:
-            print(f"Warning: Could not load security object: {e}")
+            self.security_object = None
+            print(f"Error: Could not load security object: {e}")
             return False
+
+    def load_anchor_reference(self, filepath: str):
+        """Load untrusted metadata; a provider name is not an external proof."""
+        with open(filepath, 'r') as f:
+            anchor = json.load(f)
+        if not isinstance(anchor, dict) or not anchor:
+            raise ValueError("Anchor reference must be a non-empty JSON object")
+        self.anchor_reference = anchor
+
+    def assess_anchor(self, computed_root: Optional[str]) -> Tuple[str, str]:
+        """Fail closed: no external-proof backend is implemented by this tool."""
+        anchor = self.anchor_reference
+        if anchor is None:
+            return "NOT_PROVIDED", "No anchor reference supplied"
+        if not computed_root:
+            return "NOT_CHECKED", "Merkle root unavailable; anchor binding not checked"
+        if anchor.get("merkle_root") != computed_root:
+            return "INVALID", "Anchor Merkle root does not match the event collection"
+        kind = anchor.get("anchor_type", anchor.get("provider", "unknown"))
+        if kind in ("local", "local_file"):
+            return "LOCAL_ONLY", "Local record matches root; NOT an external anchor"
+        return "UNVERIFIED", f"Provider {kind!r}: external proof verification is not implemented"
     
     def _canonical_json(self, event: Dict[str, Any]) -> str:
         """
-        Convert event to canonical JSON format (RFC 8785 JCS).
+        Reproduce this PoC's JSON serialization (not full RFC 8785 JCS).
         
         Args:
             event: Event dictionary
@@ -249,7 +281,7 @@ class VCPVerifier:
             results.append(result)
             prev_event = event
         
-        overall_valid = all(r.valid for r in results)
+        overall_valid = bool(results) and all(r.valid for r in results)
         return overall_valid, results
     
     def verify_merkle_root(self) -> Tuple[bool, Optional[str], Optional[str]]:
@@ -276,24 +308,30 @@ class VCPVerifier:
         
         expected_root = self.security_object.get("merkle_root", "")
         
-        return computed_root_hex == expected_root, computed_root_hex, expected_root
+        count_valid = self.security_object.get("event_count") == len(self.events)
+        return computed_root_hex == expected_root and count_valid, computed_root_hex, expected_root
     
     def print_report(self, chain_valid: bool, results: List[VerificationResult], 
-                     merkle_valid: bool, computed_root: Optional[str], expected_root: Optional[str]):
+                     merkle_valid: bool, computed_root: Optional[str], expected_root: Optional[str],
+                     integrity_only: bool = False):
         """Print verification report."""
         
         print("=" * 70)
-        print("VCP v1.1 Verification Report")
+        print("VCP v1.1 PoC Evidence Verification Report (NON-CERTIFIED)")
         print("=" * 70)
         
         # Summary
         valid_count = sum(1 for r in results if r.valid)
         invalid_count = len(results) - valid_count
         
-        status = "[PASS] VALID" if chain_valid and merkle_valid else "[FAIL] INVALID"
+        anchor_status, anchor_detail = self.assess_anchor(computed_root)
+        integrity_valid = chain_valid and merkle_valid and anchor_status != "INVALID"
+        status = "[INCOMPLETE] SILVER NOT ESTABLISHED" if integrity_valid else "[FAIL] INVALID EVIDENCE"
         
         print(f"\n[Verification Results]")
         print(f"  Overall Status: {status}")
+        print(f"  Checked Internal Integrity: {'[PASS]' if integrity_valid else '[FAIL]'}")
+        print(f"  Mode: {'integrity-only' if integrity_only else 'evidence assessment'}")
         print(f"  Total Events: {len(results)}")
         print(f"  Valid Events: {valid_count}")
         print(f"  Invalid Events: {invalid_count}")
@@ -308,11 +346,23 @@ class VCPVerifier:
         
         # Merkle root
         if computed_root:
-            print(f"  Merkle Root: {'[PASS]' if merkle_valid else '[FAIL]'}")
+            print(f"  Merkle Root and Event Count: {'[PASS]' if merkle_valid else '[FAIL]'}")
+            print(f"  Computed Root: {computed_root}")
             if self.verbose:
                 print(f"    Computed: {computed_root[:32]}...")
                 if expected_root:
                     print(f"    Expected: {expected_root[:32]}...")
+        else:
+            print("  Merkle Root: [NOT CHECKED] No security object")
+
+        print("\n[External Assurance]")
+        print(f"  External Anchor: [{anchor_status}] {anchor_detail}")
+        silver_status = "NOT MET" if anchor_status == "LOCAL_ONLY" else "NOT ESTABLISHED"
+        print(f"  Silver External-Anchor Requirement: [{silver_status}]")
+        print("  External Timestamp and 24-hour Cadence: [NOT VERIFIED]")
+        print("  Digital Signatures and Signer Identity: [NOT VERIFIED]")
+        print("  Full VCP Conformance and Collection Completeness: [NOT ASSESSED]")
+        print("  Certification: NON-CERTIFIED PoC")
         
         # Invalid events details
         if invalid_count > 0:
@@ -322,10 +372,10 @@ class VCPVerifier:
                     print(f"  - {r.event_id}: {', '.join(r.errors)}")
         
         print("=" * 70)
-        if chain_valid and merkle_valid:
-            print("Verification complete: All checks passed")
+        if integrity_valid:
+            print("Checked internal integrity passed; Silver compliance is NOT established.")
         else:
-            print("Verification complete: Some checks failed")
+            print("Evidence integrity checks failed; Silver compliance is NOT established.")
         print("=" * 70)
 
 
@@ -344,6 +394,9 @@ Examples:
     
     parser.add_argument("events_file", help="Path to events JSONL file")
     parser.add_argument("-s", "--security-object", help="Path to security object JSON")
+    parser.add_argument("-a", "--anchor-reference", help="Path to anchor metadata JSON (not proof verification)")
+    parser.add_argument("--integrity-only", action="store_true",
+                        help="Allow exit 0 for checked internal integrity only; never certifies Silver")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     
     args = parser.parse_args()
@@ -357,7 +410,11 @@ Examples:
     verifier = VCPVerifier(verbose=args.verbose)
     
     # Load events
-    count = verifier.load_events(args.events_file)
+    try:
+        count = verifier.load_events(args.events_file)
+    except (OSError, ValueError) as exc:
+        print(f"Error: {exc}")
+        sys.exit(1)
     if count == 0:
         print("Error: No events loaded")
         sys.exit(1)
@@ -366,22 +423,32 @@ Examples:
     
     # Load security object if provided
     if args.security_object:
-        if Path(args.security_object).exists():
-            verifier.load_security_object(args.security_object)
-        else:
-            print(f"Warning: Security object not found: {args.security_object}")
+        if not verifier.load_security_object(args.security_object):
+            sys.exit(1)
+    if args.anchor_reference:
+        try:
+            verifier.load_anchor_reference(args.anchor_reference)
+        except (OSError, ValueError) as exc:
+            print(f"Error: {exc}")
+            sys.exit(1)
     
     # Verify chain
-    chain_valid, results = verifier.verify_chain()
-    
-    # Verify Merkle root
-    merkle_valid, computed_root, expected_root = verifier.verify_merkle_root()
+    try:
+        chain_valid, results = verifier.verify_chain()
+        merkle_valid, computed_root, expected_root = verifier.verify_merkle_root()
+    except (ValueError, TypeError, KeyError, AttributeError) as exc:
+        print(f"Error: Invalid evidence structure: {exc}")
+        sys.exit(1)
     
     # Print report
-    verifier.print_report(chain_valid, results, merkle_valid, computed_root, expected_root)
+    verifier.print_report(chain_valid, results, merkle_valid, computed_root, expected_root,
+                          integrity_only=args.integrity_only)
     
     # Exit code
-    sys.exit(0 if chain_valid and merkle_valid else 1)
+    anchor_status, _ = verifier.assess_anchor(computed_root)
+    if not chain_valid or not merkle_valid or anchor_status == "INVALID":
+        sys.exit(1)
+    sys.exit(0 if args.integrity_only else 2)
 
 
 if __name__ == "__main__":

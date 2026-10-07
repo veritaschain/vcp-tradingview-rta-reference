@@ -5,7 +5,7 @@
 
 # VCP Protocol Settings
 vcp:
-  # Compliance tier: SILVER, GOLD, or PLATINUM
+  # Declared target tier (not verified conformance): SILVER, GOLD, or PLATINUM
   tier: "SILVER"
   
   # Protocol version
@@ -42,6 +42,7 @@ server:
 # External Anchoring Settings
 anchor:
   # Provider: opentimestamps, bitcoin, tsa, or local
+  # External providers are simulation stubs and cannot establish Silver compliance.
   provider: "opentimestamps"
   
   # Anchoring interval in hours

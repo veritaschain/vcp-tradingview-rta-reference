@@ -33,7 +33,7 @@ When TradingView triggers an alert, it sends a JSON payload to the configured we
 | `event_id` | string | Yes | Unique event identifier (UUID v7-like format) |
 | `timestamp` | string | Yes | ISO 8601 timestamp with milliseconds (UTC) |
 | `event_type` | string | Yes | Event type (see Event Types below) |
-| `tier` | string | Yes | Compliance tier: "SILVER", "GOLD", or "PLATINUM" |
+| `tier` | string | Yes | Declared target tier: "SILVER", "GOLD", or "PLATINUM"; not a compliance result |
 | `policy_id` | string | Yes | Policy identifier (URN format) |
 | `clock_sync` | string | Yes | Clock sync status: "BEST_EFFORT", "NTP_SYNCED", or "PTP_LOCKED" |
 | `system_id` | string | Yes | Trading system identifier |
@@ -177,9 +177,9 @@ Successful response:
 }
 ```
 
-## VCP v1.1 Compliance Notes
+## VCP v1.1 PoC Scope and Design Targets
 
 - **Policy Identification**: Required field `policy_id` identifies applicable policies
-- **External Anchoring**: Events are batch-anchored every 24 hours (Silver tier)
+- **External Anchoring**: Silver requires a real external anchor every 24 hours. This PoC includes only local evidence and simulation stubs; the requirement is not met.
 - **Merkle Tree**: Events are added to an RFC 6962 compliant Merkle tree
 - **Ed25519 Signatures**: Each event is signed for integrity verification

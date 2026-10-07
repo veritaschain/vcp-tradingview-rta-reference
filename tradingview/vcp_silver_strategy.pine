@@ -1,6 +1,6 @@
 // ============================================================================
 // VCP Silver Tier Strategy for TradingView
-// VeritasChain Protocol v1.1 Compliant
+// Non-certified PoC targeting VeritasChain Protocol v1.1
 // 
 // Copyright (c) 2025 VeritasChain Standards Organization
 // License: MIT
@@ -13,7 +13,7 @@
 //   - TradingView Pro/Pro+ or Premium (for webhook alerts)
 //   - VCP Sidecar running at your webhook endpoint
 // 
-// Compliance: VCP v1.1 Silver Tier
+// Target: VCP v1.1 Silver Tier; compliance NOT established
 //   - Clock Sync: Best-effort (TradingView server time)
 //   - Serialization: JSON
 //   - Signature: Delegated to Sidecar (Ed25519)
@@ -91,7 +91,7 @@ vcpTimestamp() =>
 // VCP WEBHOOK PAYLOAD GENERATOR
 // ============================================================================
 
-// Generate VCP-compliant JSON payload for ORDER_NEW event
+// Generate PoC JSON payload for ORDER_NEW event
 vcpOrderNewPayload(orderId, side, orderType, qty, price, slPrice, tpPrice) =>
     str.format(
         '{{' +
@@ -137,7 +137,7 @@ vcpOrderNewPayload(orderId, side, orderType, qty, price, slPrice, tpPrice) =>
         signalLine,
         histLine)
 
-// Generate VCP-compliant JSON payload for ORDER_FILLED event
+// Generate PoC JSON payload for ORDER_FILLED event
 vcpOrderFilledPayload(orderId, side, fillQty, fillPrice) =>
     str.format(
         '{{' +
@@ -170,7 +170,7 @@ vcpOrderFilledPayload(orderId, side, fillQty, fillPrice) =>
         fillQty,
         fillPrice)
 
-// Generate VCP-compliant JSON payload for POSITION_CLOSE event
+// Generate PoC JSON payload for POSITION_CLOSE event
 vcpPositionClosePayload(orderId, side, closeQty, closePrice, pnl) =>
     str.format(
         '{{' +

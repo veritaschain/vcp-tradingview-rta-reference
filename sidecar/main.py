@@ -1,6 +1,6 @@
 """
 VCP Sidecar for TradingView Integration
-VeritasChain Protocol v1.1 Silver Tier Implementation
+Non-certified PoC targeting VeritasChain Protocol v1.1 Silver Tier
 
 Copyright (c) 2025 VeritasChain Standards Organization
 License: MIT
@@ -61,7 +61,7 @@ logger = logging.getLogger("vcp-sidecar")
 
 app = FastAPI(
     title="VCP TradingView Sidecar",
-    description="VeritasChain Protocol v1.1 Silver Tier Sidecar for TradingView Integration",
+    description="Non-certified VCP v1.1 PoC Sidecar for TradingView Integration",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -94,7 +94,7 @@ class TradingViewWebhook(BaseModel):
     event_id: str = Field(..., description="Unique event identifier")
     timestamp: str = Field(..., description="ISO 8601 timestamp")
     event_type: str = Field(..., description="Event type (ORDER_NEW, ORDER_FILLED, etc.)")
-    tier: str = Field(default="SILVER", description="VCP compliance tier")
+    tier: str = Field(default="SILVER", description="Declared VCP target tier, not a conformance result")
     policy_id: str = Field(..., description="Policy identifier")
     clock_sync: str = Field(default="BEST_EFFORT", description="Clock synchronization status")
     system_id: str = Field(..., description="Trading system identifier")

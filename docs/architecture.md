@@ -1,6 +1,6 @@
 # VCP v1.1 Three-Layer Architecture
 
-This document describes the three-layer cryptographic architecture implemented in VCP v1.1 for the TradingView integration.
+This document describes design targets for the TradingView PoC. The bundled Evidence Pack is NON-CERTIFIED and does not establish Silver conformance. Layer 3 is not implemented with real external evidence; the OpenTimestamps, Bitcoin and TSA providers are simulation stubs. The bundled verifier does not verify signatures. Diagrams, benefits and mappings below describe intended capabilities, not validated properties of this pack.
 
 ## Overview
 
@@ -135,11 +135,12 @@ Proves the event collection existed at a specific point in time, verifiable by i
 
 ### Implementation
 
-#### Silver Tier (This Implementation)
-- **Anchor Interval**: Every 24 hours
-- **Provider**: OpenTimestamps (Bitcoin-backed)
+#### Silver Tier Target (Not Met by This Evidence Pack)
+- **Required Anchor Interval**: Every 24 hours
+- **Bundled Evidence**: Local anchor only
+- **External Providers**: Simulation stubs; no real external proof included
 
-#### Anchor Process
+#### Intended Anchor Process (Not Implemented)
 ```
 1. Collect events for 24-hour period
 2. Compute Merkle root of collection
@@ -216,7 +217,7 @@ def verify_anchor(merkle_root, ots_proof):
 
 ---
 
-## Compliance Mapping
+## Illustrative Design Mapping (Not a Compliance Assessment)
 
 | Regulation | Requirement | VCP Layer |
 |------------|-------------|-----------|

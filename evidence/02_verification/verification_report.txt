@@ -1,10 +1,12 @@
 Loaded 40 events from evidence/01_trade_logs/vcp_tv_events.jsonl
 ======================================================================
-VCP v1.1 Verification Report
+VCP v1.1 PoC Evidence Verification Report (NON-CERTIFIED)
 ======================================================================
 
 [Verification Results]
-  Overall Status: [PASS] VALID
+  Overall Status: [INCOMPLETE] SILVER NOT ESTABLISHED
+  Checked Internal Integrity: [PASS]
+  Mode: evidence assessment
   Total Events: 40
   Valid Events: 40
   Invalid Events: 0
@@ -12,7 +14,16 @@ VCP v1.1 Verification Report
 [Chain Integrity]
   Sequence Continuity: [PASS]
   PrevHash Integrity: [PASS]
-  Merkle Root: [PASS]
+  Merkle Root and Event Count: [PASS]
+  Computed Root: 3cbd418eda58957a01cc8d758c94974eb75ea1864bf33d9fb242880234540dbf
+
+[External Assurance]
+  External Anchor: [LOCAL_ONLY] Local record matches root; NOT an external anchor
+  Silver External-Anchor Requirement: [NOT MET]
+  External Timestamp and 24-hour Cadence: [NOT VERIFIED]
+  Digital Signatures and Signer Identity: [NOT VERIFIED]
+  Full VCP Conformance and Collection Completeness: [NOT ASSESSED]
+  Certification: NON-CERTIFIED PoC
 ======================================================================
-Verification complete: All checks passed
+Checked internal integrity passed; Silver compliance is NOT established.
 ======================================================================
