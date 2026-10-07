@@ -2,10 +2,26 @@
   "evidence_pack": {
     "name": "VCP TradingView RTA Reference Evidence Pack",
     "version": "1.1.0",
-    "created_at": "2025-01-17T00:00:00Z",
+    "created_at": null,
     "vcp_version": "1.1",
-    "tier": "SILVER",
-    "description": "Reference implementation evidence pack demonstrating VCP v1.1 Silver Tier compliance for TradingView-based algorithmic trading systems."
+    "description": "Non-certified PoC demonstrating selected VCP v1.1 mechanisms. Local anchor only; Silver compliance is not established.",
+    "target_tier": "SILVER",
+    "assessment_status": "SILVER_NOT_ESTABLISHED",
+    "metadata_correction": {
+      "updated_at": "2026-10-07T18:23:58.959942+00:00",
+      "previous_created_at": "2025-01-17T00:00:00Z",
+      "reason": "Original pack creation time cannot be established. The old value predates the bundled 2026 local artifact metadata. No source event or cryptographic artifact timestamp has been rewritten.",
+      "created_at_status": "UNKNOWN",
+      "recorded_event_time_range": {
+        "first": "2025-01-15T10:00:00+00:00",
+        "last": "2025-01-15T13:15:00+00:00"
+      },
+      "recorded_local_artifact_time_range": {
+        "first": "2026-01-17T13:00:44.412519+00:00",
+        "last": "2026-01-17T13:00:44.413196+00:00"
+      },
+      "time_assurance": "Self-reported metadata only; not externally timestamp-verified"
+    }
   },
   "platform": {
     "name": "TradingView",
@@ -15,7 +31,7 @@
   "contents": {
     "01_trade_logs": {
       "path": "01_trade_logs/vcp_tv_events.jsonl",
-      "description": "VCP v1.1 compliant event chain in JSONL format",
+      "description": "PoC event sample in JSONL format; embedded SILVER fields are target-tier declarations, not compliance results",
       "format": "JSONL (JSON Lines)",
       "event_count": 40
     },
@@ -32,12 +48,18 @@
       "security_object": "04_anchor/security_object.json",
       "anchor_reference": "04_anchor/anchor_reference.json",
       "public_key": "04_anchor/public_key.json",
-      "description": "Cryptographic security objects including Merkle root and Ed25519 public key"
+      "description": "Local anchor metadata, security object and public key; no verified external anchor"
     }
   },
   "verification": {
     "tool": "../tools/verifier/vcp_verifier.py",
-    "command": "python tools/verifier/vcp_verifier.py evidence/01_trade_logs/vcp_tv_events.jsonl -s evidence/04_anchor/security_object.json"
+    "command": "python tools/verifier/vcp_verifier.py evidence/01_trade_logs/vcp_tv_events.jsonl -s evidence/04_anchor/security_object.json -a evidence/04_anchor/anchor_reference.json",
+    "expected_exit_code": 2,
+    "scope": "Internal event hashes, sequence, PrevHash, Merkle root, event count, and anchor metadata binding only",
+    "external_anchor_status": "LOCAL_ONLY",
+    "silver_external_anchor_requirement": "NOT_MET",
+    "signatures": "NOT_VERIFIED",
+    "certification": "NON_CERTIFIED"
   },
   "anonymization": {
     "applied": true,

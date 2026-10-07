@@ -1,13 +1,13 @@
 """
 VCP Sidecar Package
-VeritasChain Protocol v1.1 Silver Tier Implementation for TradingView
+Non-certified PoC targeting VeritasChain Protocol v1.1 Silver Tier for TradingView
 
 This package provides:
 - FastAPI webhook receiver for TradingView alerts
 - VCP event processing and canonical transformation
 - Ed25519 digital signatures
 - RFC 6962 Merkle tree construction
-- External anchoring (OpenTimestamps, Bitcoin, TSA)
+- Local anchoring and external-provider simulation stubs (no external assurance)
 
 Copyright (c) 2025 VeritasChain Standards Organization
 License: MIT

@@ -1,6 +1,6 @@
 # VCP TradingView Integration Guide
 
-Complete guide for integrating VeritasChain Protocol v1.1 with TradingView.
+Setup guide for the non-certified TradingView PoC targeting VCP v1.1. The bundled pack has only a local anchor and does not establish Silver compliance. External providers are simulation stubs, not production integrations.
 
 ## Table of Contents
 
@@ -335,11 +335,11 @@ curl -X POST http://localhost:8080/vcp/anchor/force
 
 ### EU AI Act (Article 12)
 
-VCP v1.1 Silver Tier provides:
+Design targets only; these are not regulatory compliance findings for this PoC:
 - ✅ Automatic event logging
 - ✅ Timestamped records
 - ✅ Tamper-evident storage
-- ✅ External anchoring
+- **NOT IMPLEMENTED with real evidence:** External anchoring
 
 ### MiFID II (RTS 25)
 

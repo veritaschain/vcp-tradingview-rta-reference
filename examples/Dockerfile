@@ -7,7 +7,7 @@ FROM python:3.11-slim
 
 # Labels
 LABEL org.opencontainers.image.title="VCP TradingView Sidecar"
-LABEL org.opencontainers.image.description="VeritasChain Protocol v1.1 Silver Tier Sidecar"
+LABEL org.opencontainers.image.description="Non-certified VCP v1.1 PoC Sidecar"
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.vendor="VeritasChain Standards Organization"
 LABEL org.opencontainers.image.url="https://veritaschain.org"

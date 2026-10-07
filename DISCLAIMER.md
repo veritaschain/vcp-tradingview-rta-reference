@@ -12,11 +12,13 @@ This implementation:
 - ❌ Does NOT constitute official certification of any trading system
 - ❌ Should NOT be used as evidence of regulatory compliance without proper certification
 
+The bundled local anchor does not satisfy the Silver external-anchor requirement. Internal integrity results are not Silver conformance or certification results. The simulated external providers do not supply real external evidence.
+
 ### Intended Use
 
 This reference implementation is provided to:
 
-- ✅ Demonstrate VCP v1.1 Silver Tier technical requirements
+- ✅ Demonstrate selected VCP v1.1 mechanisms as a PoC; Silver requirements are not fully met
 - ✅ Provide a starting point for developers implementing VCP
 - ✅ Enable independent verification of the protocol's tamper-evidence capabilities
 - ✅ Serve as educational material for understanding cryptographic audit trails

@@ -1,6 +1,7 @@
 """
 External Anchor Service for VCP
-Supports multiple anchoring backends for external verifiability
+PoC provider interfaces. External backends are SIMULATION STUBS.
+They return success=False and verify=False; no external assurance is provided.
 
 Backends:
 - OpenTimestamps: Free, decentralized timestamping
@@ -169,13 +170,15 @@ class OpenTimestampsProvider(AnchorProvider):
             await asyncio.sleep(0.5)
             
             return AnchorResult(
-                success=True,
+                success=False,
+                error="Simulation only: no external anchor was submitted or verified",
                 provider=self.name,
                 merkle_root=merkle_root.hex(),
                 timestamp=datetime.now(timezone.utc).isoformat(),
                 anchor_id=anchor_id,
                 proof={
                     "type": "opentimestamps",
+                    "simulated": True,
                     "version": "1",
                     "calendars": self.CALENDAR_SERVERS[:2],
                     "pending": True
@@ -195,15 +198,15 @@ class OpenTimestampsProvider(AnchorProvider):
     async def verify(self, merkle_root: bytes, proof: Dict[str, Any]) -> bool:
         """Verify OpenTimestamps proof."""
         # In production: ots.verify(proof, merkle_root)
-        return proof.get("type") == "opentimestamps"
+        return False  # No external proof verifier implemented
     
     async def get_status(self, anchor_id: str) -> Dict[str, Any]:
         """Check if OTS proof has been upgraded to Bitcoin."""
         # In production: Check if proof upgraded from pending to confirmed
         return {
             "anchor_id": anchor_id,
-            "status": "pending",
-            "message": "Waiting for Bitcoin confirmation"
+            "status": "unverified",
+            "message": "Simulation only; nothing submitted to Bitcoin"
         }
 
 
@@ -256,7 +259,8 @@ class BitcoinProvider(AnchorProvider):
             ).hexdigest()
             
             return AnchorResult(
-                success=True,
+                success=False,
+                error="Simulation only: no external anchor was submitted or verified",
                 provider=self.name,
                 merkle_root=merkle_root.hex(),
                 timestamp=datetime.now(timezone.utc).isoformat(),
@@ -264,6 +268,7 @@ class BitcoinProvider(AnchorProvider):
                 tx_hash=simulated_txid,
                 proof={
                     "type": "bitcoin_opreturn",
+                    "simulated": True,
                     "txid": simulated_txid,
                     "op_return_hex": op_return_data.hex(),
                     "network": "mainnet"
@@ -287,15 +292,15 @@ class BitcoinProvider(AnchorProvider):
         
         # In production: Fetch transaction and verify OP_RETURN
         expected_data = b'VCP1' + merkle_root
-        return proof.get("op_return_hex") == expected_data.hex()
+        return False  # Matching supplied bytes is not blockchain verification
     
     async def get_status(self, anchor_id: str) -> Dict[str, Any]:
         """Check Bitcoin transaction confirmations."""
         # In production: Query Bitcoin node for confirmations
         return {
             "anchor_id": anchor_id,
-            "status": "confirmed",
-            "confirmations": 6
+            "status": "unverified",
+            "confirmations": 0
         }
 
 
@@ -338,13 +343,15 @@ class TSAProvider(AnchorProvider):
             ).hexdigest()
             
             return AnchorResult(
-                success=True,
+                success=False,
+                error="Simulation only: no external anchor was submitted or verified",
                 provider=self.name,
                 merkle_root=merkle_root.hex(),
                 timestamp=datetime.now(timezone.utc).isoformat(),
                 anchor_id=timestamp_token[:16],
                 proof={
                     "type": "rfc3161",
+                    "simulated": True,
                     "tsa_url": self.tsa_url,
                     "timestamp_token": timestamp_token,
                     "hash_algorithm": "sha256"
@@ -364,14 +371,14 @@ class TSAProvider(AnchorProvider):
     async def verify(self, merkle_root: bytes, proof: Dict[str, Any]) -> bool:
         """Verify TSA timestamp token."""
         # In production: Verify timestamp token signature
-        return proof.get("type") == "rfc3161"
+        return False  # No TSA signature/trust-chain verifier implemented
     
     async def get_status(self, anchor_id: str) -> Dict[str, Any]:
         """TSA timestamps are immediate."""
         return {
             "anchor_id": anchor_id,
-            "status": "confirmed",
-            "message": "RFC 3161 timestamp confirmed"
+            "status": "unverified",
+            "message": "Simulation only; no TSA timestamp verified"
         }
 
 
