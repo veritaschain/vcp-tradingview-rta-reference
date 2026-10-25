@@ -8,7 +8,7 @@
 
 This implementation:
 
-- ❌ Is NOT certified (VSO does not issue certificates)
+- ❌ Is NOT VC-Certified (VSO does not issue certifications itself, and no independent CAB is registered)
 - ❌ Does NOT constitute official certification of any trading system
 - ❌ Should NOT be used as evidence of regulatory compliance without proper certification
 
@@ -33,7 +33,7 @@ IN NO EVENT SHALL THE AUTHORS, COPYRIGHT HOLDERS, OR VERITASCHAIN STANDARDS ORGA
 
 ### Certification (status correction, 25 October 2026)
 
-VSO does not issue certificates. The certification scheme requires a Conformity Assessment Body (CAB) independent of the scheme owner. The only registered CAB, VeritasChain Co., Ltd. (which operates VSO), is not independent (VAP v1.2 ERRATA E-2026-10-21), so no independent certification is currently available. Conformance is not compliance (VAP v1.2 §1.6): regulatory compliance is for competent authorities and courts to evaluate. Questions: standards@veritaschain.org
+VSO does not issue certifications itself. The certification scheme requires a Conformity Assessment Body (CAB) independent of the scheme owner. The only registered CAB, VeritasChain Co., Ltd. (which operates VSO), is not independent (VAP v1.2 ERRATA E-2026-10-21), so no independent certification is currently available. Conformance is not compliance (VAP v1.2 §1.6): regulatory compliance is for competent authorities and courts to evaluate. Questions: standards@veritaschain.org
 
 ---
 
