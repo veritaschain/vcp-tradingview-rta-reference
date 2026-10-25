@@ -58,7 +58,7 @@ This Evidence Pack demonstrates selected VCP mechanisms integrated with TradingV
 | **External Anchor (Silver)** | OPTIONAL | **REQUIRED** |
 | **Policy Identification** | - | **REQUIRED** |
 | **PrevHash** | REQUIRED | OPTIONAL |
-| **Completeness Guarantees** | - | ✅ NEW |
+| **Completeness verification (omission detection at anchor granularity)** | - | ✅ NEW |
 
 ---
 

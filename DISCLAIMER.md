@@ -8,7 +8,7 @@
 
 This implementation:
 
-- ❌ Is NOT VC-Certified by the VeritasChain Standards Organization
+- ❌ Is NOT certified (VSO does not issue certificates)
 - ❌ Does NOT constitute official certification of any trading system
 - ❌ Should NOT be used as evidence of regulatory compliance without proper certification
 
@@ -31,12 +31,9 @@ THE SOFTWARE AND EVIDENCE PACK ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIN
 
 IN NO EVENT SHALL THE AUTHORS, COPYRIGHT HOLDERS, OR VERITASCHAIN STANDARDS ORGANIZATION BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-### For Official Certification
+### Certification (status correction, 25 October 2026)
 
-For official VC-Certified status and regulatory compliance verification, please contact:
-
-- **Email:** certification@veritaschain.org
-- **Web:** https://veritaschain.org/certification
+VSO does not issue certificates. The certification scheme requires a Conformity Assessment Body (CAB) independent of the scheme owner. The only registered CAB, VeritasChain Co., Ltd. (which operates VSO), is not independent (VAP v1.2 ERRATA E-2026-10-21), so no independent certification is currently available. Conformance is not compliance (VAP v1.2 §1.6): regulatory compliance is for competent authorities and courts to evaluate. Questions: standards@veritaschain.org
 
 ---
 
