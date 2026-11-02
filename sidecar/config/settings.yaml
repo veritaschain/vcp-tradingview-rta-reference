@@ -29,12 +29,13 @@ server:
   # Port number
   port: 8080
   
-  # Webhook secret for validation (set via environment variable in production)
+  # Required at startup. VCP_WEBHOOK_SECRET overrides this value, including empty values.
   # Generate with: openssl rand -hex 32
   webhook_secret: ""
   
-  # Enable CORS (for development)
+  # Browser origins are opt-in; server-to-server webhooks do not require CORS.
   cors_enabled: true
+  allowed_origins: []  # Example: ["https://console.example.com"]; no wildcards
   
   # Request timeout (seconds)
   timeout: 30

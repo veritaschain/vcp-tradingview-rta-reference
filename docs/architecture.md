@@ -18,7 +18,7 @@ VCP v1.1 introduces a **Three-Layer Architecture** that provides progressive lev
 ├─────────────────────────────────────────────────────────────────┤
 │  Layer 2: Collection Integrity                                  │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │  RFC 6962 Merkle Tree + PrevHash Chain                    │  │
+│  │  Historical PoC Merkle Tree + PrevHash Chain                    │  │
 │  │  - Detects missing events (completeness)                  │  │
 │  │  - Efficient verification (O(log n))                      │  │
 │  │  - Single root hash represents entire collection          │  │
@@ -85,9 +85,12 @@ Ensures no events have been omitted, inserted, or reordered.
 
 ### Implementation
 
-#### RFC 6962 Merkle Tree
+#### Historical PoC Merkle Tree
 
-Domain separation prefixes prevent second-preimage attacks:
+The builder uses RFC-style domain-separation prefixes, but duplicates odd nodes
+rather than following the RFC 6962/9162 split construction. Prefixes alone do not
+establish RFC conformance or authenticated completeness. See
+[construction limits](MERKLE_LIMITATIONS.md). The prefix functions are:
 
 ```python
 LEAF_PREFIX = b'\x00'
@@ -139,6 +142,21 @@ Proves the event collection existed at a specific point in time, verifiable by i
 - **Required Anchor Interval**: Every 24 hours
 - **Bundled Evidence**: Local anchor only
 - **External Providers**: Simulation stubs; no real external proof included
+
+#### Pending Batch Handling (Corrected 2026-11-02)
+
+Forced and periodic attempts share a process-local lock. An attempt seals the
+oldest tree and swaps incoming events to a fresh tree before awaiting the
+provider. A failure, exception or cancellation retains the sealed tree for
+retry. Only explicit success for its root retires it; arrivals are never
+cleared by completion of the older request. Pending counts cover both trees,
+while the status root refers only to the oldest batch. Event fields and the
+historical odd-node Merkle construction are unchanged.
+
+This in-memory mechanism does not implement restart recovery, coordination
+between worker processes or an archive of retired inclusion proofs. Provider
+success is not proof verification or a VCP conformance result. Local success
+remains local recording, and the external-provider stubs remain unsuccessful.
 
 #### Intended Anchor Process (Not Implemented)
 ```

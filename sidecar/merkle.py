@@ -1,6 +1,6 @@
 """
 Merkle Tree Implementation for VCP
-RFC 6962 Compliant Merkle Tree
+Historical PoC Merkle tree with odd-node duplication (not RFC 6962/9162)
 
 Implements:
 - Leaf hashing with domain separation (0x00 prefix)
@@ -9,7 +9,7 @@ Implements:
 - Batch construction
 
 References:
-- RFC 6962: Certificate Transparency
+- RFC 9162 §2.1.1: the reference split construction differs from this PoC
 - VCP v1.1 Specification Section 6 (Three-Layer Architecture)
 
 Copyright (c) 2025 VeritasChain Standards Organization
@@ -44,7 +44,10 @@ class MerkleProofNode:
 
 class MerkleTree:
     """
-    RFC 6962 Compliant Merkle Tree Implementation.
+    Historical PoC tree using RFC-style domain prefixes and odd-node duplication.
+
+    This is not the RFC 6962/9162 split construction. Historical roots and
+    proofs keep this algorithm; verification does not establish RFC conformance.
     
     Features:
     - Domain separation for leaf (0x00) and internal (0x01) nodes
@@ -98,7 +101,7 @@ class MerkleTree:
         """
         Compute internal node hash with domain separation.
         
-        RFC 6962: MTH(D[n]) = SHA-256(0x01 || MTH(D[0:k]) || MTH(D[k:n]))
+        Uses the RFC-style 0x01 prefix, but subtree construction differs.
         """
         return self._hash(self.INTERNAL_PREFIX + left + right)
     
@@ -140,7 +143,7 @@ class MerkleTree:
             for i in range(0, len(current_layer), 2):
                 left = current_layer[i]
                 
-                # If odd number, duplicate the last node
+                # Historical odd-node duplication; not RFC 6962/9162 splitting.
                 if i + 1 < len(current_layer):
                     right = current_layer[i + 1]
                 else:
@@ -358,16 +361,16 @@ def parse_proof_from_json(proof_json: List[dict]) -> List[Tuple[str, bytes]]:
 
 class MerkleConsistencyProof:
     """
-    Merkle consistency proof for append-only log verification.
-    
-    Used to prove that a smaller tree is a prefix of a larger tree,
-    ensuring the append-only property (no retroactive modifications).
+    Unimplemented consistency-proof interface; it provides no verified result.
+
+    Generation fails explicitly and verification always returns False. The
+    historical PoC tree is not an RFC 6962/9162 consistency-proof implementation.
     """
     
     @staticmethod
     def generate(old_tree_size: int, new_tree: MerkleTree) -> List[bytes]:
         """
-        Generate consistency proof between tree sizes.
+        Refuse generation because consistency proofs are not implemented.
         
         Args:
             old_tree_size: Size of the older tree
@@ -376,28 +379,14 @@ class MerkleConsistencyProof:
         Returns:
             List of hashes forming the consistency proof
         """
-        # Implementation follows RFC 6962 consistency proof algorithm
-        # This is a simplified version for the PoC
-        
-        if old_tree_size == 0:
-            return []
-        
-        if old_tree_size > new_tree.size:
-            raise ValueError("Old tree cannot be larger than new tree")
-        
-        if old_tree_size == new_tree.size:
-            return []
-        
-        # For PoC: Return the intermediate roots
-        # Full implementation would follow RFC 6962 Section 2.1.4
-        return []
+        raise NotImplementedError("Consistency proof generation is not implemented")
     
     @staticmethod
     def verify(old_root: bytes, old_size: int, 
                new_root: bytes, new_size: int,
                proof: List[bytes]) -> bool:
         """
-        Verify a consistency proof.
+        Return False: consistency verification is not implemented.
         
         Args:
             old_root: Root of the older tree
@@ -407,11 +396,9 @@ class MerkleConsistencyProof:
             proof: Consistency proof hashes
         
         Returns:
-            True if proof is valid
+            False (not verified); this interface cannot establish consistency
         """
-        # Simplified verification for PoC
-        # Full implementation would follow RFC 6962 verification
-        return True
+        return False
 
 
 # ============================================================================

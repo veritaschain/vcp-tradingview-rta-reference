@@ -6,6 +6,18 @@ This document describes the JSON payload format for VCP TradingView webhooks.
 
 When TradingView triggers an alert, it sends a JSON payload to the configured webhook URL. The VCP Sidecar receives this payload and processes it according to VCP v1.1 specifications.
 
+## Transport authentication
+
+The sidecar requires a configured shared secret. Send the
+`X-VCP-Webhook-Secret` header, or add a top-level `webhook_secret` string to a
+private event-alert JSON template. This field is transport metadata, is excluded
+from the VCP event and is never signed or stored by the ingestion handler.
+Both values must match if both are sent. The bundled Pine strategy does not
+insert credentials; use a private adaptation or an authenticated relay.
+Use HTTPS outside local testing and keep the credential out of public scripts
+and URLs. Missing, conflicting or incorrect credentials reject the event before
+signing, Merkle insertion or persistence. This is not replay protection.
+
 ## Payload Structure
 
 ```json

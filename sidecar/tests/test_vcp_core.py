@@ -192,7 +192,7 @@ class TestVCPSigner:
 # ============================================================================
 
 class TestMerkleTree:
-    """Test RFC 6962 Merkle tree implementation."""
+    """Test the historical odd-duplication PoC Merkle implementation."""
     
     def test_empty_tree(self):
         """Test empty tree behavior."""

@@ -14,6 +14,44 @@ VCP-TV-RTA is a **non-certified proof of concept (PoC)** for TradingView-based a
 
 ---
 
+## Security and tree-construction correction — 2 November 2026
+
+Set a private `VCP_WEBHOOK_SECRET` (or `server.webhook_secret`) before starting the
+sidecar. An empty or missing secret stops startup before any event/key/anchor
+component is initialized. All `/vcp/` endpoints require the
+`X-VCP-Webhook-Secret` header. Event ingestion also accepts a top-level
+`webhook_secret` JSON field for a private alert template; this transport field
+is excluded from the recorded and signed event. If both credentials are sent,
+both must match. Credentials are compared with `hmac.compare_digest`.
+
+Existing unauthenticated alerts are rejected. Configure the credential in a
+private sender/alert template, or use a trusted relay that adds the header.
+The bundled Pine strategy does not insert a secret. Do not put secrets in a
+public script or webhook URL. See [integration instructions](docs/INTEGRATION.md).
+`/health` and API documentation remain public. This shared-secret mechanism does
+not provide replay protection, per-client roles or production readiness.
+
+Browser CORS is disabled unless `server.allowed_origins` lists explicit HTTP(S)
+origins. Wildcards are rejected and credentialed CORS is disabled. CORS is not
+authentication; server-to-server webhooks do not need it.
+
+The Merkle builder retains the historical odd-node duplication algorithm and
+RFC-style domain prefixes. It is **not** the RFC 6962/9162 split construction.
+The unimplemented consistency-proof verifier now returns `False` (not verified),
+and generation raises `NotImplementedError`. Historical evidence and root/proof
+construction are unchanged. See [the construction limits](docs/MERKLE_LIMITATIONS.md).
+
+Forced and periodic anchoring now retain the pending batch when a provider
+returns failure, raises an exception, or the attempt is cancelled. The forced
+endpoint returns HTTP 502 for an unconfirmed result. Each attempt seals one
+batch while new events enter a separate tree; retries use the sealed batch
+first. Only explicit provider success for that batch's root retires it. A local
+provider's success still means local recording only, not external assurance.
+Pending counts include both trees, and the status root identifies the oldest
+batch. This bookkeeping is in memory in one process: restart recovery,
+coordination across workers and an archive of retired inclusion proofs are
+not implemented. See [anchoring behavior](docs/INTEGRATION.md#force-anchor-testing-only).
+
 ## Overview
 
 This Evidence Pack demonstrates selected VCP mechanisms integrated with TradingView's Pine Script environment. It is not production-ready or a complete conformance demonstration. The implementation captures algorithmic trading decisions and execution events using a **sidecar architecture** that operates independently of the TradingView platform via webhooks.
@@ -37,7 +75,7 @@ This Evidence Pack demonstrates selected VCP mechanisms integrated with TradingV
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
 │  │ FastAPI     │→ │ Canonical   │→ │ Merkle Tree │→ │ Anchor  │ │
 │  │ Receiver    │  │ Transform   │  │ Builder     │  │ Service │ │
-│  │             │  │ (RFC 8785)  │  │ (RFC 6962)  │  │         │ │
+│  │             │  │ (RFC 8785)  │  │ (PoC tree)  │  │         │ │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
 │        │                                                 ↓      │
 │        ▼                                    ┌───────────────────┐│
@@ -119,6 +157,7 @@ pip install -r requirements.txt
 python -m sidecar.keygen
 
 # Run server
+export VCP_WEBHOOK_SECRET="$(openssl rand -hex 32)"
 python -m sidecar.main
 ```
 
@@ -153,3 +192,7 @@ MIT License (Implementation Code)
 
 **VeritasChain Standards Organization (VSO)**  
 *"Verify, Don't Trust."*
+
+## License scope clarification — 2 November 2026
+
+Documentation remains CC BY 4.0. First-party code, scripts, code examples and schemas additionally offer [Apache-2.0](LICENSE-CODE); existing licenses and third-party notices remain in effect. See [LICENSE](LICENSE) for the scope and preserved prior terms. This editorial licensing note does not change protocol requirements or claim conformance.

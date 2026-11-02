@@ -6,7 +6,7 @@ This package provides:
 - FastAPI webhook receiver for TradingView alerts
 - VCP event processing and canonical transformation
 - Ed25519 digital signatures
-- RFC 6962 Merkle tree construction
+- Historical PoC Merkle construction (odd-node duplication; not RFC 6962/9162)
 - Local anchoring and external-provider simulation stubs (no external assurance)
 
 Copyright (c) 2025 VeritasChain Standards Organization
