@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security and documentation — 2026-11-02
+- Refuse startup without a configured webhook secret; require constant-time credential checks before event processing and other VCP API actions.
+- Exclude transport credentials from event persistence/signatures, reject conflicting credentials, and restrict CORS to explicit configured origins without credentialed CORS.
+- Retain the historical odd-node Merkle construction while documenting its difference from RFC 6962/9162.
+- Fail closed for the unimplemented consistency-proof interface. Historical evidence files are unchanged.
+- Fail closed on forced/periodic anchor failures and exceptions; retain cancelled attempts, serialize anchor requests, and separate incoming events from the sealed retry batch without changing event wire fields or historical Merkle bytes.
+- Report pending counts across both trees and match the event hash as well as its batch-local index when looking up live inclusion proofs. Retired proofs remain unavailable rather than being generated from a later batch.
+- Ignore generated Python bytecode and pytest caches.
+
 ### Corrected
 - Replaced unsupported Silver / production-ready / complete-evidence claims with non-certified PoC status.
 - Split internal integrity results from external assurance; local or unsupported anchors cannot produce Silver success. Default CLI exits 2 when Silver is not established.

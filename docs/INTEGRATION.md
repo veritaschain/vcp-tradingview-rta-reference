@@ -124,12 +124,28 @@ vcp:
 server:
   host: "0.0.0.0"
   port: 8080
-  webhook_secret: "your-secret-here"  # Generate: openssl rand -hex 32
+  webhook_secret: ""  # Set VCP_WEBHOOK_SECRET in the environment
+  allowed_origins: []  # Explicit browser origins only; no wildcard
 
 anchor:
   provider: "opentimestamps"
   interval_hours: 24
 ```
+
+The secret is required at startup. Set it once in your private deployment
+environment and configure the same value at the sender:
+
+```bash
+export VCP_WEBHOOK_SECRET="$(openssl rand -hex 32)"
+```
+
+Every `/vcp/` request needs `X-VCP-Webhook-Secret`. Event POSTs may instead put
+`webhook_secret` at the top level of the JSON body; the sidecar removes this
+transport field before recording/signing. The bundled Pine script does not
+insert it: use a private alert-template adaptation or an authenticated relay.
+Do not put the secret in URLs or public scripts. An explicit empty environment
+value overrides YAML and refuses startup. Browser access is opt-in via exact
+`allowed_origins`; server-to-server requests do not require CORS.
 
 ### Step 5: Start Sidecar
 
@@ -272,6 +288,7 @@ server {
 ```bash
 curl -X POST http://localhost:8080/vcp/event \
   -H "Content-Type: application/json" \
+  -H "X-VCP-Webhook-Secret: $VCP_WEBHOOK_SECRET" \
   -d '{
     "vcp_version": "1.1",
     "event_id": "TEST-001",
@@ -289,20 +306,48 @@ curl -X POST http://localhost:8080/vcp/event \
 ### Verify Event
 
 ```bash
-curl http://localhost:8080/vcp/verify/TEST-001
+curl -H "X-VCP-Webhook-Secret: $VCP_WEBHOOK_SECRET" http://localhost:8080/vcp/verify/TEST-001
 ```
 
 ### Check Merkle Proof
 
 ```bash
-curl http://localhost:8080/vcp/proof/TEST-001
+curl -H "X-VCP-Webhook-Secret: $VCP_WEBHOOK_SECRET" http://localhost:8080/vcp/proof/TEST-001
 ```
 
 ### Force Anchor (Testing Only)
 
 ```bash
-curl -X POST http://localhost:8080/vcp/anchor/force
+curl -X POST -H "X-VCP-Webhook-Secret: $VCP_WEBHOOK_SECRET" http://localhost:8080/vcp/anchor/force
 ```
+
+The forced and periodic paths share the same batch handling (corrected
+2026-11-02):
+
+- An attempt seals the oldest pending batch. New events enter a fresh tree
+  while the provider call is awaiting a result; their returned indices are
+  not rewritten or discarded.
+- Provider `success=False`, an exception, cancellation, or a result for a
+  different root leaves the sealed batch pending. Subsequent attempts retry
+  that same root before newer events. Simultaneous anchor requests are
+  serialized within this process.
+- The forced endpoint returns HTTP **502** if the result is unconfirmed,
+  **400** when no batch is pending, and **200** with `success: true` only when
+  the provider explicitly reports success for the submitted root. This is
+  the provider operation's result, not a Silver assessment or independent
+  verification of external proof. Local-provider success is still local only.
+- `/health` and `/vcp/anchor/status` include the sealed and active batches in
+  their pending count. The status `merkle_root` is the oldest pending batch's
+  root, not a root spanning the entire pending count.
+- Proof lookup matches both the hash and batch-local index in pending trees.
+  A retired/unavailable inclusion proof returns HTTP **409**; it is not
+  generated from an unrelated later batch that reuses the same index.
+
+The batching state is in memory in a single process. Restart recovery,
+coordination between multiple workers, and a persistent archive of retired
+inclusion proofs are not implemented. Run this PoC with one worker. The
+bundled external providers remain simulation stubs and cannot drain a pending
+batch successfully; these changes do not implement an external backend.
 
 ## Troubleshooting
 
@@ -321,9 +366,12 @@ curl -X POST http://localhost:8080/vcp/anchor/force
 
 ### Anchor Failed
 
-1. Check internet connectivity
-2. Verify anchor provider is reachable
-3. Check logs for specific error
+The bundled OpenTimestamps, Bitcoin and TSA providers deliberately return
+failure because no external submission or verification is implemented.
+HTTP 502 and retained pending events are the expected outcome with these
+providers. Check the selected provider and logs; restoring network access
+does not turn a simulation stub into an external anchor. A local provider is
+available for local testing only.
 
 ### Pine Script Errors
 

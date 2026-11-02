@@ -22,6 +22,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - VCP_WEBHOOK_SECRET=${VCP_WEBHOOK_SECRET:?Set a private webhook secret before starting}
       - VCP_TIER=SILVER
       - VCP_VERSION=1.1
       - VCP_POLICY_ID=urn:vso:policy:tv-retail:v1
