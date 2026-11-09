@@ -85,8 +85,8 @@ Setup guide for the non-certified TradingView PoC targeting VCP v1.1. The bundle
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/veritaschain/vcp-tradingview.git
-cd vcp-tradingview
+git clone https://github.com/veritaschain/vcp-tradingview-rta-reference.git
+cd vcp-tradingview-rta-reference
 ```
 
 ### Step 2: Install Dependencies
@@ -406,8 +406,8 @@ For personal data:
 
 ## Support
 
-- **Documentation**: https://github.com/veritaschain/vcp-tradingview
-- **Issues**: https://github.com/veritaschain/vcp-tradingview/issues
+- **Documentation**: https://github.com/veritaschain/vcp-tradingview-rta-reference
+- **Issues**: https://github.com/veritaschain/vcp-tradingview-rta-reference/issues
 - **Email**: support@veritaschain.org
 - **Standards**: standards@veritaschain.org
 
