@@ -125,6 +125,33 @@ class VCPEvent:
 # VCP Signer (Ed25519)
 # ============================================================================
 
+_ED25519_P = 2**255 - 19
+# Five y coordinates cover all eight pure small-order points, both x signs.
+_ED25519_SMALL_ORDER_Y = {
+    0, 1, _ED25519_P - 1,
+    int.from_bytes(bytes.fromhex(
+        "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05"), "little"),
+    int.from_bytes(bytes.fromhex(
+        "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a"), "little"),
+}
+
+
+def _check_public_key(raw: bytes) -> None:
+    """Apply local key admission; leave curve/equation and R/S checks to crypto.
+
+    This rejects noncanonical and pure small-order keys, not mixed-order points.
+    It is not an adopted VAP/VCP normative signature profile.
+    """
+    if len(raw) != 32:
+        raise ValueError("Ed25519 public key must contain exactly 32 bytes")
+    encoded = int.from_bytes(raw, "little")
+    y = encoded & (2**255 - 1)
+    if y >= _ED25519_P or (y in (1, _ED25519_P - 1) and encoded >> 255):
+        raise ValueError("noncanonical Ed25519 public key encoding")
+    if y in _ED25519_SMALL_ORDER_Y:
+        raise ValueError("small-order Ed25519 public key")
+
+
 class VCPSigner:
     """
     Ed25519 Digital Signature Implementation for VCP.
@@ -141,6 +168,11 @@ class VCPSigner:
         """Initialize signer with optional key pair."""
         self._private_key = private_key
         self._public_key = public_key or (private_key.public_key() if private_key else None)
+        if self._public_key is not None:
+            _check_public_key(self._public_key.public_bytes(
+                encoding=serialization.Encoding.Raw,
+                format=serialization.PublicFormat.Raw,
+            ))
     
     @classmethod
     def generate(cls) -> 'VCPSigner':
