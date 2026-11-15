@@ -183,6 +183,19 @@ python tools/verifier/vcp_verifier.py \
 - Existing event fields such as `tier: "SILVER"` are preserved as hashed source data and represent the intended tier, not an assessed result.
 - Sample event times are in January 2025; local artifact metadata is dated January 2026. The original pack creation time is unknown. Its unsupported 2025 `created_at` value is retained in correction provenance, not asserted as fact. See [the verification guide](docs/VERIFICATION_GUIDE.md).
 
+## Local signer key admission
+
+`VCPSigner` rejects noncanonical Ed25519 public-key encodings and all eight
+pure small-order points, including the identity key, at construction and PEM
+loading. An invalid configured key raises `ValueError`; it cannot establish
+successful verification by supplying the identity-key forgery `R = identity,
+S = 0`. Normal generated keys and valid signatures keep their existing behavior.
+
+This is a local implementation restriction, not adoption of a VAP/VCP normative
+signature profile. It preserves signed bytes and backend signature-equation/R/S
+checks, does not separately reject mixed-order public keys, and does not extend
+the standalone chain verifier's assurance scope described above.
+
 ## License
 
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (Evidence Pack)  
