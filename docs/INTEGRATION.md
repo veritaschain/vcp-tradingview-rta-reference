@@ -391,6 +391,8 @@ Design targets only; these are not regulatory compliance findings for this PoC:
 
 ### MiFID II (RTS 25)
 
+> **Note — 21 November 2026 (informative).** RTS 25 (Commission Delegated Regulation (EU) 2017/574) set the accuracy of business clocks only: reference time, level of accuracy and maximum divergence from UTC. It was repealed with effect from 2 March 2026; business-clock synchronisation is now set by [Commission Delegated Regulation (EU) 2025/1155](https://eur-lex.europa.eu/eli/reg_del/2025/1155/oj), Articles 11 to 16. Order identification, algorithm identification and decision parameters, listed below, were not RTS 25 requirements. The list describes fields this PoC records; it is not a mapping to a regulation, and millisecond precision has not been checked against the replacement regulation.
+
 VCP records include:
 - ✅ Order identification
 - ✅ Algorithm identification
