@@ -246,6 +246,8 @@ def verify_anchor(merkle_root, ots_proof):
 | MiFID II RTS 25 | Timestamp accuracy | Layer 3 |
 | GDPR | Data integrity | Layer 1+2 |
 
+> **Note — 21 November 2026 (informative).** RTS 25 (Commission Delegated Regulation (EU) 2017/574) set the accuracy of business clocks only: reference time, level of accuracy and maximum divergence from UTC. It was repealed with effect from 2 March 2026; business-clock synchronisation is now set by [Commission Delegated Regulation (EU) 2025/1155](https://eur-lex.europa.eu/eli/reg_del/2025/1155/oj), Articles 11 to 16. The "Audit trail" and "Completeness" rows above are therefore not RTS 25 requirements, and the rows keep their earlier wording only as a record of this PoC's design notes. The table has not been re-checked against the replacement regulation.
+
 ---
 
 ## References
